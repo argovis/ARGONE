@@ -18,6 +18,8 @@ from folium.plugins import HeatMap
 
 from pymongo import MongoClient
 import util.helpers as h
+client = MongoClient('mongodb://database/argo')
+db = client.argo
 
 class ExcelFloat(Core):
 	@classmethod
@@ -42,8 +44,7 @@ parser.add_argument("filename", help="filename of csv file with argo locations",
 #parser.add_argument("timestep", help="timestep of prediction",type=float)
 args = parser.parse_args()
 records = {} # will be a dictionary of records for this origin lon/lat keyed by (forecast lon, forecast lat)
-timesteps = list(range(90,181,90))
-timesteps.reverse() # start with the longest forecast so we start with the complete set of forecast long/lats
+timesteps = list(range(90,1801,90))
 for timestep in timesteps:
 	#assert args.timestep>45, "timestep must be greater than 45 days"
 	timestep = round(timestep/90)
@@ -60,11 +61,10 @@ for timestep in timesteps:
 	df = df[df.Probability!=0]
 	df = df.reset_index(drop=True)
 
-	if not records:
-		for index, row in df.iterrows():
-			records[(row['Longitude'], row['Latitude'])] = [[None]]*len(timesteps)
 	for index, row in df.iterrows():
-			records[(row['Longitude'], row['Latitude'])][timestep - 1] = [row['Probability']]
+		if (row['Longitude'], row['Latitude']) not in records:
+			records[(row['Longitude'], row['Latitude'])] = [[None]]*len(timesteps)
+		records[(row['Longitude'], row['Latitude'])][timestep - 1] = [row['Probability']]
 
 for key, value in records.items():
 	doc = {
@@ -74,7 +74,14 @@ for key, value in records.items():
 		"geolocation_forecast": {"type":"Point", "coordinates":[h.tidylon(key[0]),key[1]]},
 		"data": value
 	}
-	print(doc)
+
+	# insert new record
+	try:
+		db['covariance'].insert_one(doc)
+	except BaseException as err:
+		print('error: db write insert failure')
+		print(err)
+		print(doc)
 
 	# url = 'https://server.arcgisonline.com/arcgis/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}'
 	# map=folium.Map(location=[0,0],zoom_start=2)
@@ -94,11 +101,3 @@ for key, value in records.items():
 	# map.save(outfile=os.path.join(ROOT_DIR,'./Output/map.html'))
 	# os.system('open '+os.path.join(ROOT_DIR,'./Output/map.html'))
 
-
-
-
-# print(df.iloc[0]['Latitude'])
-# print(df.iloc[0]['Longitude'])
-# print(df.iloc[0]['Probability'])
-# print(float_lats,float_lons)
-# print(float_array)
