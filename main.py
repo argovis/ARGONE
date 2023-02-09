@@ -69,7 +69,7 @@ for timestep in timesteps:
 for key, value in records.items():
 	doc = {
 		"_id": str(h.tidylon(float_lons[0])) + '_' + str(float_lats[0]) + '_' + str(h.tidylon(key[0])) + '_' + str(key[1]),
-		"metadata": ['covariance'],
+		"metadata": ['argone'],
 		"geolocation": {"type":"Point", "coordinates":[h.tidylon(float_lons[0]),float_lats[0]]},
 		"geolocation_forecast": {"type":"Point", "coordinates":[h.tidylon(key[0]),key[1]]},
 		"data": value
@@ -77,7 +77,7 @@ for key, value in records.items():
 
 	# insert new record
 	try:
-		db['covariance'].insert_one(doc)
+		db['argone'].insert_one(doc)
 	except BaseException as err:
 		print('error: db write insert failure')
 		print(err)
