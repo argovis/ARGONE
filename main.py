@@ -18,6 +18,7 @@ from folium.plugins import HeatMap
 
 from pymongo import MongoClient
 import util.helpers as h
+import datetime
 client = MongoClient('mongodb://database/argo')
 db = client.argo
 
@@ -82,6 +83,27 @@ for key, value in records.items():
 		print('error: db write insert failure')
 		print(err)
 		print(doc)
+
+metadata = {
+	"_id": "argone",
+	"data_type": "covariance",
+	"data_info": [
+		["90","180","270","360","450","540","630","720","810","900","990","1080","1170","1260","1350","1440","1530","1620","1710","1800"],
+		['units'],
+		[[None]]*20
+	],
+	"date_updated_argovis": datetime.datetime.now(),
+	"levels": [0],
+	"source": [{"source" : ["tbd"], "doi" : "tbd"}]
+}
+
+# insert new record
+try:
+	db['argoneMeta'].insert_one(metadata)
+except BaseException as err:
+	print('error: db metadata write insert failure')
+	print(err)
+	print(doc)
 
 	# url = 'https://server.arcgisonline.com/arcgis/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}'
 	# map=folium.Map(location=[0,0],zoom_start=2)
