@@ -47,3 +47,17 @@ for example, in the test case we executed
 python main.py test 150
 ``` 
 where test.csv is the csv file we want to open and we want to consider a 150 day propogation (the code automatically rounds up to 180 days).
+
+## Argovis database population
+
+The Argovis fork of this repo populates Argovis' MongoDB instance rather than output text files. Populate for a single lat / long with:
+
+```
+cat <<EOF > Data/test.csv
+Latitude,Longitude
+-44,-178
+EOF
+python -u main.py test
+```
+
+Or all of them via `build_covariance.sh`
