@@ -94,7 +94,8 @@ metadata = {
 	],
 	"date_updated_argovis": datetime.datetime.now(),
 	"levels": [0],
-	"source": [{"source" : ["tbd"], "doi" : "tbd"}]
+        "level_units": "dbar",
+	"source": [{"source":["ARGONE"],"doi":"https://doi.org/10.1175/JTECH-D-22-0070.1"}]
 }
 
 # insert new record
